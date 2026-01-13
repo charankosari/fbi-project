@@ -1,0 +1,56 @@
+# Dependencies
+node_modules
+npm-debug.log
+yarn-error.log
+# Keep package-lock.json for npm ci
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Git
+.git
+.gitignore
+.gitattributes
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Test files
+test-foundry.js
+test-cloudinary.js
+*.test.js
+*.spec.js
+
+# Documentation
+README.md
+*.md
+
+# Build files
+dist
+build
+*.log
+
+# Vercel
+vercel.json
+.vercel
+
+# Docker
+Dockerfile
+.dockerignore
+docker-compose.yml
+
+# Misc
+*.tmp
+*.temp
+.cache
+
