@@ -8,6 +8,7 @@ import CaseChat from "@/components/CaseChat";
 import CameraCapture from "@/components/CameraCapture";
 import { parseMarkdown } from "@/lib/markdown";
 import { processLocation } from "@/lib/locationUtils";
+import { API_URL } from "@/lib/config";
 
 interface Case {
   _id: string;
@@ -58,7 +59,7 @@ export default function CaseDetailPage() {
   const fetchCase = useCallback(async () => {
     try {
       const response = await fetch(
-        `https://fbi-backend-production-402c.up.railway.app/api/cases/${caseId}`,
+        `${API_URL}/api/cases/${caseId}`,
         {
           cache: "no-store",
         }
@@ -108,7 +109,7 @@ export default function CaseDetailPage() {
 
       try {
         const response = await fetch(
-          `https://fbi-backend-production-402c.up.railway.app/api/cases/${caseId}/images`,
+          `${API_URL}/api/cases/${caseId}/images`,
           {
             method: "POST",
             body: formData,
@@ -153,7 +154,7 @@ export default function CaseDetailPage() {
         formData.append("images", file);
 
         const uploadResponse = await fetch(
-          `https://fbi-backend-production.up.railway.app/api/cases/${caseId}/images`,
+          `${API_URL}/api/cases/${caseId}/images`,
           {
             method: "POST",
             body: formData,
@@ -180,7 +181,7 @@ export default function CaseDetailPage() {
     setAnalyzing(true);
     try {
       const response = await fetch(
-        `https://fbi-backend-production-402c.up.railway.app/api/ai/analyze/${caseId}`,
+        `${API_URL}/api/ai/analyze/${caseId}`,
         {
           method: "POST",
         }
@@ -206,7 +207,7 @@ export default function CaseDetailPage() {
 
       try {
         const response = await fetch(
-          `https://fbi-backend-production-402c.up.railway.app/api/cases/${caseId}/images/${imageId}`,
+          `${API_URL}/api/cases/${caseId}/images/${imageId}`,
           {
             method: "DELETE",
           }
@@ -245,7 +246,7 @@ export default function CaseDetailPage() {
       }
 
       const response = await fetch(
-        `https://fbi-backend-production-402c.up.railway.app/api/cases/${caseId}`,
+        `${API_URL}/api/cases/${caseId}`,
         {
           method: "PUT",
           headers: {
@@ -277,7 +278,7 @@ export default function CaseDetailPage() {
 
     try {
       const response = await fetch(
-        `https://fbi-backend-production-402c.up.railway.app/api/cases/${caseId}`,
+        `${API_URL}/api/cases/${caseId}`,
         {
           method: "DELETE",
         }

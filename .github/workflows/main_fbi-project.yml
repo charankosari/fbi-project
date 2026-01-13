@@ -35,7 +35,8 @@ jobs:
           echo "NODE_ENV=production" >> backend/.env
           
           # Create frontend .env file
-          echo "NEXT_PUBLIC_API_URL=${{ secrets.NEXT_PUBLIC_API_URL }}" > frontend/.env
+          # We don't set NEXT_PUBLIC_API_URL here so config.ts defaults to relative paths for single-app hosting
+          echo "NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME=${{ secrets.CLOUDINARY_CLOUD_NAME }}" > frontend/.env
 
       - name: npm install, build, and test
         run: |

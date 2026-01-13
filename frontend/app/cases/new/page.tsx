@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import CameraCapture from "@/components/CameraCapture";
 import { processLocation } from "@/lib/locationUtils";
+import { API_URL } from "@/lib/config";
 
 export default function NewCasePage() {
   const router = useRouter();
@@ -44,7 +45,7 @@ export default function NewCasePage() {
       }
 
       const response = await fetch(
-        `https://fbi-backend-production-402c.up.railway.app/api/cases`,
+        `${API_URL}/api/cases`,
         {
           method: "POST",
           headers: {
@@ -69,7 +70,7 @@ export default function NewCasePage() {
 
           try {
             await fetch(
-              `https://fbi-backend-production-402c.up.railway.app/api/cases/${newCase._id}/images`,
+              `${API_URL}/api/cases/${newCase._id}/images`,
               {
                 method: "POST",
                 body: imageFormData,

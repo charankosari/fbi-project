@@ -1,4 +1,5 @@
-// Location normalization and geocoding utilities
+
+import { API_URL } from "./config";
 
 interface LocationCoordinates {
   lat: number;
@@ -209,7 +210,7 @@ export const normalizeLocation = async (location: string): Promise<string> => {
   // Use AI to determine the most likely location
   try {
     const response = await fetch(
-      `https://fbi-backend-production-402c.up.railway.app/api/ai/normalize-location`,
+      `${API_URL}/api/ai/normalize-location`,
       {
         method: "POST",
         headers: {
@@ -341,7 +342,7 @@ export const processLocation = async (
   try {
     // Check if we can get coordinates from AI endpoint (it returns coordinates too)
     const response = await fetch(
-      `https://fbi-backend-production-402c.up.railway.app/api/ai/normalize-location`,
+      `${API_URL}/api/ai/normalize-location`,
       {
         method: "POST",
         headers: {

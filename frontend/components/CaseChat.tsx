@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { parseMarkdown } from "@/lib/markdown";
+import { API_URL } from "@/lib/config";
 
 interface Case {
   _id: string;
@@ -61,7 +62,7 @@ export default function CaseChat({ caseId, caseData }: CaseChatProps) {
 
     try {
       const response = await fetch(
-        `https://fbi-backend-production-402c.up.railway.app/api/ai/chat/${caseId}`,
+        `${API_URL}/api/ai/chat/${caseId}`,
         {
           method: "POST",
           headers: {

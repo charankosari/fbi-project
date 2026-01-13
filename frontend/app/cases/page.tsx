@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback, useMemo, memo } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import CasesMap from "@/components/CasesMap";
+import { API_URL } from "@/lib/config";
 
 interface Case {
   _id: string;
@@ -110,7 +111,7 @@ export default function CasesPage() {
   const fetchCases = useCallback(async () => {
     try {
       const response = await fetch(
-        `https://fbi-backend-production-402c.up.railway.app/api/cases`,
+        `${API_URL}/api/cases`,
         {
           cache: "no-store",
         }

@@ -70,6 +70,23 @@ app.use(async (req, res, next) => {
   }
 });
 
+// Serve static files from Next.js build in production
+if (process.env.NODE_ENV === "production") {
+  const frontendBuildPath = path.join(__dirname, "..", "frontend", "out");
+  
+  // Serve static files (js, css, images)
+  app.use(express.static(frontendBuildPath));
+  
+  // All other routes should serve the Next.js app (SPA fallback)
+  app.get("*", (req, res) => {
+    // Don't serve index for API routes
+    if (req.path.startsWith("/api/")) {
+      return res.status(404).json({ error: "API endpoint not found" });
+    }
+    res.sendFile(path.join(frontendBuildPath, "index.html"));
+  });
+}
+
 // Health check
 app.get("/api/health", (req, res) => {
   res.json({ status: "ok", message: "Backend is running" });

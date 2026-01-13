@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from "react";
 
+import { API_URL } from "@/lib/config";
+
 interface Image {
   _id: string;
   filename?: string;
@@ -71,7 +73,7 @@ export default function ImageCarousel({
     }
     // Fallback to backend URL for backward compatibility
     if (image.filename) {
-      return `https://fbi-backend-production-402c.up.railway.app/uploads/${image.filename}`;
+      return `${API_URL}/uploads/${image.filename}`;
     }
     return "";
   };
