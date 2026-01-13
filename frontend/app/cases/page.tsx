@@ -133,7 +133,7 @@ export default function CasesPage() {
 
   const handleCaseClick = useCallback(
     (caseId: string) => {
-      router.push(`/cases/${caseId}`);
+      router.push(`/cases/view?id=${caseId}`);
     },
     [router]
   );

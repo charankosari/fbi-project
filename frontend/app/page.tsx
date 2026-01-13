@@ -373,7 +373,7 @@ export default function Dashboard() {
               </div>
               <CasesMap
                 cases={filteredCases}
-                onMarkerClick={(caseId) => router.push(`/cases/${caseId}`)}
+                onMarkerClick={(caseId) => router.push(`/cases/view?id=${caseId}`)}
               />
             </div>
           )}
@@ -460,7 +460,7 @@ export default function Dashboard() {
                         <tr
                           key={caseItem._id}
                           className="border-b border-border/50 hover:bg-gray-50 cursor-pointer transition-all"
-                          onClick={() => router.push(`/cases/${caseItem._id}`)}
+                          onClick={() => router.push(`/cases/view?id=${caseItem._id}`)}
                         >
                           <td className="py-4 px-4">
                             <p className="font-medium text-foreground">
@@ -534,7 +534,7 @@ export default function Dashboard() {
                             <button
                               onClick={(e) => {
                                 e.stopPropagation();
-                                router.push(`/cases/${caseItem._id}`);
+                                router.push(`/cases/view?id=${caseItem._id}`);
                               }}
                               className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gray-50 hover:bg-gray-100 text-foreground-muted hover:text-foreground text-sm font-medium transition-all border border-transparent hover:border-border"
                             >

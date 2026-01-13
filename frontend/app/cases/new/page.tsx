@@ -82,7 +82,7 @@ export default function NewCasePage() {
           }
         }
 
-        router.push(`/cases/${newCase._id}`);
+        router.push(`/cases/view?id=${newCase._id}`);
       } else {
         const error = await response.json();
         alert(error.error || "Failed to create case");

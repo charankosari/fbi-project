@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState, useRef, useCallback, useMemo } from "react";
-import { useRouter, useParams } from "next/navigation";
+import { useEffect, useState, useRef, useCallback, useMemo, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import ImageCarousel from "@/components/ImageCarousel";
 import CaseChat from "@/components/CaseChat";
@@ -32,10 +32,10 @@ interface Case {
   };
 }
 
-export default function CaseDetailPage() {
+function CaseDetailContent() {
   const router = useRouter();
-  const params = useParams();
-  const caseId = params.id as string;
+  const searchParams = useSearchParams();
+  const caseId = searchParams.get("id");
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [caseData, setCaseData] = useState<Case | null>(null);
@@ -57,6 +57,8 @@ export default function CaseDetailPage() {
   });
 
   const fetchCase = useCallback(async () => {
+    if (!caseId) return;
+
     try {
       const response = await fetch(
         `${API_URL}/api/cases/${caseId}`,
@@ -93,8 +95,23 @@ export default function CaseDetailPage() {
   useEffect(() => {
     if (caseId) {
       fetchCase();
+    } else {
+        // If no ID, redirect back to cases list
+        setLoading(false);
     }
   }, [caseId, fetchCase]);
+
+  // If no case ID is present in URL
+  if (!caseId && !loading) {
+      return (
+        <div className="min-h-screen flex items-center justify-center">
+            <div className="text-center">
+                <p className="mb-4">No case selected</p>
+                <Button onClick={() => router.push('/cases')}>Back to Cases</Button>
+            </div>
+        </div>
+      );
+  }
 
   const handleImageUpload = useCallback(
     async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -810,239 +827,106 @@ export default function CaseDetailPage() {
                   />
                 ) : (
                   !uploading && (
-                    <div className="text-center py-12 text-foreground-subtle">
-                      <svg
-                        className="mx-auto h-12 w-12 text-gray-400 mb-4"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
-                        />
-                      </svg>
-                      <p>No images uploaded yet</p>
-                      <p className="text-xs mt-2">
-                        Click "Upload Images" to add multiple images
+                    <div className="text-center py-8 bg-gray-50 rounded-lg border-2 border-dashed border-border">
+                      <p className="text-foreground-subtle">
+                        No images uploaded for this case.
                       </p>
+                      <Button
+                        onClick={() => fileInputRef.current?.click()}
+                        variant="link"
+                        className="text-accent-purple mt-2"
+                      >
+                        Upload images now
+                      </Button>
                     </div>
                   )
                 )}
               </div>
-
-              {/* Chat Section */}
-              <CaseChat caseId={caseId} caseData={caseData} />
-
-              {/* AI Analysis Section */}
-              {hasAnalysis && caseData.aiAnalysis && (
-                <div className="card-premium p-6">
-                  <h2 className="text-2xl font-semibold text-foreground mb-4">
-                    AI Analysis
-                  </h2>
-
-                  <div className="mb-6">
-                    <label className="text-foreground-subtle text-sm font-medium mb-2 block">
-                      Summary
-                    </label>
-                    <div className="mt-2 p-4 bg-gray-50 rounded-lg border border-border">
-                      <div className="text-foreground leading-relaxed">
-                        {parseMarkdown(caseData.aiAnalysis.summary)}
-                      </div>
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="text-foreground-subtle text-sm font-medium mb-3 block">
-                      Key Insights
-                    </label>
-                    <div className="space-y-3">
-                      {caseData.aiAnalysis.insights.map((insight, index) => (
-                        <div
-                          key={index}
-                          className="p-4 bg-gray-50 rounded-lg border border-border hover:border-accent-purple/50 hover:shadow-sm transition-all"
-                        >
-                          <div className="flex items-start gap-3">
-                            <span className="flex-shrink-0 w-8 h-8 bg-gradient-to-br from-accent-purple to-accent-pink text-white rounded-full flex items-center justify-center font-semibold text-sm shadow-sm">
-                              {index + 1}
-                            </span>
-                            <div className="text-foreground leading-relaxed flex-1">
-                              {parseMarkdown(insight)}
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className="mt-4 text-foreground-subtle text-sm">
-                    Analyzed on:{" "}
-                    {new Date(caseData.aiAnalysis.analyzedAt).toLocaleString()}
-                  </div>
-                </div>
-              )}
             </div>
 
-            {/* Sidebar */}
+            {/* Sidebar Content */}
             <div className="space-y-6">
-              {/* Quick Actions */}
+              {/* AI Analysis */}
               <div className="card-premium p-6">
-                <h3 className="text-xl font-semibold text-foreground mb-4">
-                  Quick Actions
-                </h3>
-                <div className="space-y-3">
-                  <div>
-                    <input
-                      ref={fileInputRef}
-                      type="file"
-                      accept="image/*"
-                      multiple
-                      onChange={handleImageUpload}
-                      className="hidden"
-                      id="image-upload-sidebar"
-                    />
-                    <Button
-                      onClick={() => fileInputRef.current?.click()}
-                      disabled={uploading}
-                      className="w-full bg-foreground hover:bg-foreground/90 text-white"
-                    >
-                      {uploading ? (
-                        <>
-                          <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
-                          Uploading...
-                        </>
-                      ) : (
-                        <>
-                          <svg
-                            className="w-5 h-5 mr-2"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M12 4v16m8-8H4"
-                            />
-                          </svg>
-                          Upload Images
-                        </>
-                      )}
-                    </Button>
-                  </div>
-
-                  {hasImages && (
-                    <Button
-                      onClick={handleAnalyze}
-                      disabled={analyzing}
-                      className="w-full bg-gradient-to-r from-accent-purple to-accent-pink hover:from-accent-purple/90 hover:to-accent-pink/90 text-white shadow-sm hover:shadow-md"
-                    >
-                      {analyzing ? (
-                        <>
-                          <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
-                          Analyzing...
-                        </>
-                      ) : hasAnalysis ? (
-                        <>
-                          <svg
-                            className="w-5 h-5 mr-2"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-                            />
-                          </svg>
-                          Re-analyze Case
-                        </>
-                      ) : (
-                        <>
-                          <svg
-                            className="w-5 h-5 mr-2"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"
-                            />
-                          </svg>
-                          Analyze Case
-                        </>
-                      )}
-                    </Button>
-                  )}
-
-                  {hasAnalysis && (
-                    <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
-                      <p className="text-green-600 text-sm text-center font-medium">
-                        ✓ Case Analyzed
-                      </p>
-                      <p className="text-green-500 text-xs text-center mt-1">
-                        Last analyzed:{" "}
-                        {new Date(
-                          caseData.aiAnalysis!.analyzedAt
-                        ).toLocaleString()}
-                      </p>
-                    </div>
-                  )}
+                <div className="flex justify-between items-center mb-4">
+                  <h2 className="text-xl font-semibold text-foreground">
+                    AI Analysis
+                  </h2>
+                  <Button
+                    onClick={handleAnalyze}
+                    disabled={analyzing}
+                    variant="outline"
+                    size="sm"
+                    className="border-accent-purple text-accent-purple hover:bg-accent-purple hover:text-white"
+                  >
+                    {analyzing ? (
+                      <>
+                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
+                        Analyzing...
+                      </>
+                    ) : (
+                      <>
+                        <svg
+                          className="w-4 h-4 mr-2"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M13 10V3L4 14h7v7l9-11h-7z"
+                          />
+                        </svg>
+                        {hasAnalysis ? "Re-analyze" : "Analyze Case"}
+                      </>
+                    )}
+                  </Button>
                 </div>
-              </div>
 
-              {/* Case Metadata */}
-              <div className="card-premium p-6">
-                <h3 className="text-xl font-semibold text-foreground mb-4">
-                  Case Details
-                </h3>
-                <div className="space-y-3 text-sm">
-                  <div>
-                    <span className="text-foreground-subtle font-medium">
-                      Case ID:
-                    </span>
-                    <p className="text-foreground font-mono text-xs break-all mt-1">
-                      {caseData._id}
+                {hasAnalysis ? (
+                  <div className="space-y-4">
+                    <div>
+                      <h3 className="text-sm font-semibold text-foreground mb-2">
+                        Summary
+                      </h3>
+                      <div className="text-sm text-foreground-subtle bg-gray-50 p-3 rounded-lg">
+                        {parseMarkdown(caseData.aiAnalysis!.summary)}
+                      </div>
+                    </div>
+                    <div>
+                      <h3 className="text-sm font-semibold text-foreground mb-2">
+                        Key Insights
+                      </h3>
+                      <ul className="space-y-2">
+                        {caseData.aiAnalysis!.insights.map((insight, idx) => (
+                          <li key={idx} className="flex items-start gap-2 text-sm text-foreground-subtle">
+                            <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-accent-purple shrink-0"></span>
+                            <span>{insight}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                    <p className="text-xs text-foreground-muted pt-2 border-t border-border">
+                      Last analyzed:{" "}
+                      {new Date(
+                        caseData.aiAnalysis!.analyzedAt
+                      ).toLocaleString()}
                     </p>
                   </div>
-                  <div>
-                    <span className="text-foreground-subtle font-medium">
-                      Created:
-                    </span>
-                    <p className="text-foreground mt-1">
-                      {caseData.dateReported
-                        ? new Date(caseData.dateReported).toLocaleString()
-                        : "Not specified"}
+                ) : (
+                  <div className="text-center py-6 text-foreground-subtle">
+                    <p>No AI analysis available yet.</p>
+                    <p className="text-xs mt-2">
+                      Click analyze to generate insights.
                     </p>
                   </div>
-                  {hasImages && (
-                    <div>
-                      <span className="text-foreground-subtle font-medium">
-                        Images:
-                      </span>
-                      <p className="text-foreground mt-1">
-                        {caseData.images?.length || 0} uploaded
-                      </p>
-                    </div>
-                  )}
-                  {hasAnalysis && (
-                    <div>
-                      <span className="text-foreground-subtle font-medium">
-                        AI Analysis:
-                      </span>
-                      <p className="text-foreground mt-1">Completed</p>
-                    </div>
-                  )}
-                </div>
+                )}
               </div>
+
+              {/* Chat Interface */}
+              <CaseChat caseId={caseId!} caseData={caseData} />
             </div>
           </div>
         </div>
@@ -1055,5 +939,13 @@ export default function CaseDetailPage() {
         />
       )}
     </div>
+  );
+}
+
+export default function CaseDetailPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <CaseDetailContent />
+    </Suspense>
   );
 }
